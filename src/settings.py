@@ -1,5 +1,12 @@
 import logging
 from datetime import datetime
+import os
+
+path = os.path.join('./', 'logs')
+
+if not os.path.isdir(path):
+    os.mkdir(path)
+
 
 logging.basicConfig(
         encoding='utf-8',
