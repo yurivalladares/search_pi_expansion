@@ -3,7 +3,7 @@ from requests.adapters import HTTPAdapter, Retry
 import logging
 from src.conditions import *
 
-def get_pi_api(start: int, lenght: int) -> str:
+def get_pi_api(start_position: int, api_data_length: int) -> str:
 
     session = requests.Session()
     retry = Retry(connect=10, backoff_factor=1)
@@ -11,24 +11,28 @@ def get_pi_api(start: int, lenght: int) -> str:
     session.mount('http://', adapter)
     session.mount('https://', adapter)
 
-    url = f"https://api.pi.delivery/v1/pi?start={start}&numberOfDigits={lenght}"
+    url = f"https://api.pi.delivery/v1/pi?start={start_position}&numberOfDigits={api_data_length}"
 
     response = session.get(url)
     data = response.json()['content']
     return data
 
-def search_pi_api(start: int, digits: int, condition_list: list) -> dict[str, int]:
-    
+def search_pi_api(start_position: int, digits: int, condition_list: list, reverse = False, api_data_length = 1000) -> dict[str, int]:
+    if api_data_length < digits:
+        raise Exception('digits must be smaller than api_data_length')
+    if not condition_list:
+        raise Exception('condition_list is empty')
+
     logging.info(f'Digits: {digits}')
-    logging.info(f'Conditions: {[condition.__name__ for condition in condition_list]}')
-
+    logging.info(f'Reverse search: {reverse}')
+    logging.info(f'Conditions: {[i.__name__ for i in condition_list]}')
     logging.info('Search started')
-
+    result = {}
     verifier = True
-    start = start
+    position = start_position
     while verifier:
-        logging.info(f'Looking at position... {start}')
-        data = get_pi_api(start, 1000)
+        logging.info(f'Looking at position... {position}')
+        data = get_pi_api(position, api_data_length)
         for i in range(0, len(data) - digits):
 
             if data[i] == '0':
@@ -36,17 +40,27 @@ def search_pi_api(start: int, digits: int, condition_list: list) -> dict[str, in
 
             number = int(data[i: i + digits])
 
+
             if all(condition_wraper(condition_list, number)):
                 
                 result = {
                     'number': number,
-                    'position': start+i
+                    'position': position+i
                 }
                 logging.info('###### FOUND ######')
                 logging.info(result)
                 verifier = False
                 break
         else:
-            start += i
-
+            if not reverse:
+                position += i
+            else:
+                if position == 1:
+                    verifier = False
+                elif (position - i) > 1:
+                    position -= i
+                else:
+                    position = 1
+    if not result:
+        logging.info('###### NOT FOUND ######')
     return result
