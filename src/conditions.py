@@ -1,17 +1,17 @@
 def condition_wraper(condition_list: list, number: int) -> list:
+    if condition_list == []:
+        raise ValueError('Condition list must not be empty')
     return [condition(number) for condition in condition_list]
 
 
 def is_prime(x: int) -> bool:
-    if x % 2 == 0:
-        return False
-    for i in range(3, int(x**0.5 + 1), 2):
-        if x % i == 0:
-            return False
+    if x<=1:return False
+    if x==2 or x==3:return True
+    if x%2==0 or x%3==0:return False
+    for i in range(5, int(x**0.5)+1, 6):
+        if x%i==0 or x%(i+2)==0:return False
     return True
 
 
 def is_palindrome(x: int) -> bool:
-    if x < 0:
-        return False
     return str(x) == str(x)[::-1]
