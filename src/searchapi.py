@@ -27,9 +27,7 @@ def search_pi_api(
     api_data_length=1000,
 ) -> dict[str, int]:
     if api_data_length < digits:
-        raise Exception("digits must be smaller than api_data_length")
-    if not condition_list:
-        raise Exception("condition_list is empty")
+        raise ValueError("digits must be smaller than api_data_length")
 
     logging.info(f"Digits: {digits}")
     logging.info(f"Reverse search: {reverse}")
