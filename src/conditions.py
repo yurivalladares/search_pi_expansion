@@ -1,6 +1,6 @@
 def condition_wraper(condition_list: list, number: int) -> list:
-    if condition_list == []:
-        raise ValueError('Condition list must not be empty')
+    if not condition_list:
+        raise ValueError('condition_list cannot be empty')
     return [condition(number) for condition in condition_list]
 
 
