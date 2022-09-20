@@ -5,6 +5,7 @@ from src.conditions import *
 
 
 def get_pi_api(start_position: int, api_data_length: int) -> str:
+    if start_position < 1: raise ValueError('start_position must be greater than 0')
 
     session = requests.Session()
     retry = Retry(connect=10, backoff_factor=1)
@@ -33,11 +34,14 @@ def search_pi_api(
     logging.info(f"Reverse search: {reverse}")
     logging.info(f"Conditions: {[i.__name__ for i in condition_list]}")
     logging.info("Search started")
+
     result = {}
     verifier = True
     position = start_position
+
     while verifier:
         logging.info(f"Looking at position... {position}")
+
         data = get_pi_api(position, api_data_length)
         for i in range(0, len(data) - digits):
 
@@ -63,6 +67,7 @@ def search_pi_api(
                     position -= i
                 else:
                     position = 1
-    if not result:
-        logging.info("###### NOT FOUND ######")
+
+    if not result: logging.info("###### NOT FOUND ######")
+
     return result
